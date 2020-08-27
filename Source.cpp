@@ -5,7 +5,7 @@ constexpr auto VERSION_NUMBER = "0.1.0";
 auto main(int argc, char **argv)->int {
 	if (argc == 1) {
 		withcolor(6, 0, []{
-			std::cout << pp::logo;
+			std::cout << pp::codes::logo;
 		});
 	}
 	if (argc == 2) {
@@ -15,34 +15,12 @@ auto main(int argc, char **argv)->int {
 	}
 	if (argc == 3) {
 		if (true && !strcmp(argv[1], "new")) {
-			std::string name(argv[2]);
-			auto path = fs::current_path() / name;
-			fs::create_directory(path);
-			fs::create_directory(path / "src");
-			fs::create_directory(path / "src" / "modules");
-			fs::create_directory(path / "target");
-			fs::create_directory(path / "target" / "debug");
-			fs::create_directory(path / "target" / "release");
-			
-			(std::ofstream(path / "src" / "main.epp") << 
-				R"(lib std
-
-When it starts
-	It printf about "Hello, world")").close();
-			(std::ofstream(path / "config") << (R"(
-Licence         MIT License
-ProjectName     )" + name + R"(
-Version         0.1.0
-
-CppStandard     c++17
-Transpile       en++ .\src\main
-Compile         g++ -o out %s -std=%s -fconcepts
-)")).close();
+			pp::setup(argc, argv);
 		}
 	}
 	if (argc == 2) {
 		if (true && !strcmp(argv[1], "run")) {
-			if (fs::exists(fs::current_path() / "config")) {
+			if (fs::exists(fs::current_path() / "config.eppconf")) {
 				auto configs = pp::parseConf(fs::current_path() / "config");
 
 				pp::transpile(configs);
@@ -59,13 +37,13 @@ Compile         g++ -o out %s -std=%s -fconcepts
 	}
 	if (argc == 2) {
 		if (true && !strcmp(argv[1], "build")) {
-			if (fs::exists(fs::current_path() / "config")) {
-				auto configs = pp::parseConf(fs::current_path() / "config");
+			if (fs::exists(fs::current_path() / "config.eppconf")) {
+				auto configs = pp::parseConf(fs::current_path() / "config.eppconf");
 				pp::transpile(configs);
 				pp::compile(configs);
 			}
 			else {
-				err("file \"config\" not found");
+				err("file \"config.eppconf\" not found");
 			}
 		}
 	}
@@ -77,7 +55,7 @@ Compile         g++ -o out %s -std=%s -fconcepts
 	}
 	if (argc == 2) {
 		if (true && !strcmp(argv[1], "just-run")) {
-			auto configs = pp::parseConf(fs::current_path() / "config");
+			auto configs = pp::parseConf(fs::current_path() / "config.eppconf");
 			system((std::ostringstream() << (fs::current_path() / "target" / "debug" / configs["ProjectName"])).str().c_str());
 		}
 	}
